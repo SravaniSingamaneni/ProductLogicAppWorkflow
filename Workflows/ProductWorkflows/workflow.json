@@ -1,0 +1,132 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2019-05-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+
+    "triggers": {
+      "When_HTTP_Request_Received": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {}
+        }
+      }
+    },
+
+    "actions": {
+
+      "Validate_Input": {
+        "type": "If",
+        "expression": {
+          "and": [
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['product']",
+                  null
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['items']",
+                  null
+                ]
+              }
+            }
+          ]
+        },
+        "actions": {
+
+          "Transform_Request": {
+            "type": "Liquid",
+            "inputs": {
+              "content": "@triggerBody()",
+              "map": {
+                "source": "Artifacts/Maps/ProductRequestTransform.liquid"
+              }
+            }
+          },
+
+          "Call_Product_API": {
+            "runAfter": {
+              "Transform_Request": [ "Succeeded" ]
+            },
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://your-api-url/api/orders",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": "@body('Transform_Request')"
+            }
+          },
+
+          "Check_API_Response": {
+            "runAfter": {
+              "Call_Product_API": [ "Succeeded" ]
+            },
+            "type": "If",
+            "expression": {
+              "equals": [
+                "@outputs('Call_Product_API')['statusCode']",
+                200
+              ]
+            },
+            "actions": {
+
+              "Transform_Success_Response": {
+                "type": "Liquid",
+                "inputs": {
+                  "content": "@body('Call_Product_API')",
+                  "map": {
+                    "source": "Artifacts/Maps/ProductResponseTransform.liquid"
+                  }
+                }
+              }
+
+            },
+            "else": {
+              "actions": {
+
+                "Transform_Error_Response": {
+                  "type": "Liquid",
+                  "inputs": {
+                    "content": "@body('Call_Product_API')",
+                    "map": {
+                      "source": "Artifacts/Maps/ErrorTransform.liquid"
+                    }
+                  }
+                }
+
+              }
+            }
+          }
+
+        },
+
+        "else": {
+          "actions": {
+
+            "Invalid_Input_Response": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "body": {
+                  "error": "Invalid request payload"
+                }
+              }
+            }
+
+          }
+        }
+      }
+
+    },
+
+    "outputs": {}
+  }
+}
