@@ -44,7 +44,7 @@
             "inputs": {
               "content": "@triggerBody()",
               "map": {
-                "source": "Artifacts/Maps/ProductRequestTransform.liquid"
+                "source": "Maps/ProductRequestTransform.liquid"
               }
             }
           },
@@ -82,7 +82,7 @@
                 "inputs": {
                   "content": "@body('Call_Product_API')",
                   "map": {
-                    "source": "Artifacts/Maps/ProductResponseTransform.liquid"
+                    "source": "Maps/ProductResponseTransform.liquid"
                   }
                 }
               }
@@ -96,7 +96,7 @@
                   "inputs": {
                     "content": "@body('Call_Product_API')",
                     "map": {
-                      "source": "Artifacts/Maps/ErrorTransform.liquid"
+                      "source": "Maps/ErrorTransform.liquid"
                     }
                   }
                 }
