@@ -1,11 +1,13 @@
 {
   "productCode": "{{content.product.code}}",
   "productName": "{{content.product.name}}",
+  "description": "{{content.product.description}}"
   "productItems": [
     { % for item in content.items % }
     {
       "productId": "{{item.productId}}",
-      "quantity": "{{item.quantity}}"
+      "quantity": "{{item.quantity}}",
+      "price":{{item.price}}
     } 
     { % unless forloop.last % },{ % endunless % }
     { % endfor % }
